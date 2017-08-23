@@ -10,7 +10,11 @@ df = df[['NomeParlamentar','CNPJCPF','sgUF','vlrDocumento','Fornecedor']]
 #Separa apenas os deputados da PB
 df = df[df['sgUF']== 'PB']
 
+#Converte a coluna de valores pra float
 df['vlrDocumento'] = df['vlrDocumento'].astype(float)
+
+#Remoção da notação científica da coluna de CNPJ/CPF
+df['CNPJCPF'] = (df['CNPJCPF'].map(lambda x: '{:.0f}'.format(x)))
 
 #Agrupa os valores por Nome do Parlamentar e do Fornecedor
 
