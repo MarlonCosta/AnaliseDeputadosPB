@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup
 from networkx import *
 import pandas
 from unicodedata import normalize
+import matplotlib.pyplot as plt
+
+# Dados para filtragem
+uf = 'PB'
 
 page = urllib.request.urlopen(
     "http://www.camara.leg.br/SitCamaraWS/Deputados.asmx/ObterDeputados")  # link com os dados básicos dos deputados
@@ -23,7 +27,7 @@ for i in range(0, len(lista_dados_deputados)):
 df_cota = pandas.read_csv("cota/Ano-2016.csv", sep=";", decimal=',', header=0)
 
 # Separa apenas os deputados da PB
-df_cota = df_cota[df_cota['sgUF'] == 'PB']
+df_cota = df_cota[df_cota['sgUF'] == uf]
 
 # Remove os valores nulos (sem CNPJ/CPF ou sem valor)
 df_cota = df_cota[df_cota.txtCNPJCPF.notnull()]
@@ -38,8 +42,11 @@ df_cota_resumo = df_cota.groupby(["txNomeParlamentar", "sgPartido", "sgUF", "txt
 # Advinha
 print(df_cota_resumo)
 
-# Criando grafo
+# Criando grafo completo
 G = nx.from_pandas_dataframe(df_cota, "txNomeParlamentar", 'txtCNPJCPF', create_using=nx.DiGraph())
 
-# Testando se cada parlamentar e empresa virou um nó
-print(G.nodes())
+# Desenha o grafo :D
+nx.draw(G, style="solid", with_labels=True, width=list(df_cota['vlrLiquido'] / 8000), arrows=True)
+
+# Mostra o grafo
+plt.show()
