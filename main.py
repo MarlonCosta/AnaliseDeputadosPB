@@ -27,9 +27,12 @@ for i in range(0, len(lista_dados_deputados)):
 # Abre o CSV
 lista_csv = []
 for file in os.listdir('cota'):
-    df_cota = pandas.read_csv("cota/"+file, sep=";", decimal=',', header=0)
+    print(file)
+    df_cota = pandas.read_csv("cota/" + file, sep=";", decimal=',', header=0,
+                              dtype={'vlrRestituicao': str, 'txtDescricaoEspecificacao': str})
     lista_csv.append(df_cota)
-df_cota = pandas.concat(lista_csv)
+
+df_cota = pandas.DataFrame(pandas.concat(lista_csv))
 
 # Separa apenas os deputados da PB
 df_cota = df_cota[df_cota['sgUF'] == uf]
@@ -37,21 +40,25 @@ df_cota = df_cota[df_cota['sgUF'] == uf]
 # Remove os valores nulos (sem CNPJ/CPF ou sem valor)
 df_cota = df_cota[df_cota.txtCNPJCPF.notnull()]
 df_cota = df_cota[df_cota.vlrLiquido.notnull()]
+df_cota = df_cota[df_cota.txNomeParlamentar.notnull()]
 
 # Remove a notação científica do CNPJ/CPF
-#df_cota['txtCNPJCPF'] = (df_cota['txtCNPJCPF'].map(lambda x: '{:.0f}'.format(x)))
+df_cota['txtCNPJCPF'] = df_cota['txtCNPJCPF'].astype(float)
+df_cota['txtCNPJCPF'] = (df_cota['txtCNPJCPF'].map(lambda x: '{:.0f}'.format(x)))
 
-df_cota_resumo = df_cota.groupby(["txNomeParlamentar", "sgPartido", "sgUF", "txtCNPJCPF", "txtFornecedor"]).agg(
-    {"vlrLiquido": ["sum", "count"]}).reset_index()
+print(df_cota)
+
+# df_cota_resumo = df_cota.groupby(["txNomeParlamentar", "sgPartido", "sgUF", "txtCNPJCPF", "txtFornecedor"]).agg(
+#     {"vlrLiquido": ["sum", "count"]}).reset_index()
 
 # Advinha
-print(df_cota_resumo)
+# print(df_cota_resumo)
 
 # Criando grafo completo
 G = nx.from_pandas_dataframe(df_cota, "txNomeParlamentar", 'txtCNPJCPF', create_using=nx.DiGraph())
 
 # Desenha o grafo :D
-#nx.draw(G, style="solid", with_labels=True, width=list(df_cota['vlrLiquido'] / 8000), arrows=True)
+nx.draw(G, style="solid", with_labels=True, width=list(df_cota['vlrLiquido'] / 8000), arrows=True)
 
 # Mostra o grafo
 plt.show()
