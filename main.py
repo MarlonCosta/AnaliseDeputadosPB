@@ -13,7 +13,7 @@ def BSS(string, deputados):
     string = string.upper()
     sugestoes = []
     if string in deputados:
-        return string
+        return [string]
     for deputado in deputados:
         if SequenceMatcher(deputado, string).ratio() > 0.7:
             sugestoes.append(deputado)
@@ -85,7 +85,7 @@ if ano:
                                   dtype={'txtCNPJCPF': str, 'txNomeParlamentar': str, 'vlrRestituicao': str,
                                          'txtDescricaoEspecificacao': str})
 else:
-    for file in os.listdir('cota'):
+    for file in sorted(os.listdir('cota')):
         if file.startswith("Ano-"):
             print("Carregando: " + file)
             df_cota = pandas.read_csv("cota/" + file, sep=";", decimal=',', header=0,
